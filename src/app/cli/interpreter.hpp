@@ -243,6 +243,7 @@ private:
 private:
     std::shared_ptr<JobManager> mJobManager = nullptr;
     std::shared_ptr<Registry>   mRegistry   = nullptr;
+    std::string mEPSKc = "";
 
     bool mShouldExit = false;
 
