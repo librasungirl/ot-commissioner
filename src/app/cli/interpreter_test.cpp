@@ -69,6 +69,7 @@ using namespace ot::commissioner::persistent_storage;
 
 using testing::_;
 using testing::DoAll;
+using testing::InSequence;
 using testing::Return;
 using testing::ReturnRef;
 using testing::StrEq;
@@ -919,6 +920,101 @@ TEST_F(InterpreterTestSuite, PC_StartCurrentNetworkSuccess)
     expr  = ctx.mInterpreter.ParseExpression("start --dom this");
     value = ctx.mInterpreter.Eval(expr);
     EXPECT_TRUE(value.HasNoError());
+}
+
+TEST_F(InterpreterTestSuite, PC_StateStopped)
+{
+    TestContext ctx;
+    InitContext(ctx);
+
+    EXPECT_CALL(*ctx.mDefaultCommissionerObject, IsActive()).WillOnce(Return(false));
+    EXPECT_CALL(*ctx.mDefaultCommissionerObject, IsConnected()).WillOnce(Return(false));
+
+    Interpreter::Expression expr;
+    Interpreter::Value      value;
+    expr  = ctx.mInterpreter.ParseExpression("state");
+    value = ctx.mInterpreter.Eval(expr);
+    EXPECT_STREQ("stopped", value.ToString().c_str());
+}
+
+TEST_F(InterpreterTestSuite, PC_StateConnected)
+{
+    TestContext ctx;
+    InitContext(ctx);
+
+    EXPECT_CALL(*ctx.mDefaultCommissionerObject, IsActive()).WillOnce(Return(false));
+    EXPECT_CALL(*ctx.mDefaultCommissionerObject, IsConnected()).WillOnce(Return(true));
+
+    Interpreter::Expression expr;
+    Interpreter::Value      value;
+    expr  = ctx.mInterpreter.ParseExpression("state");
+    value = ctx.mInterpreter.Eval(expr);
+    EXPECT_STREQ("connected", value.ToString().c_str());
+}
+
+TEST_F(InterpreterTestSuite, PC_StateActive)
+{
+    TestContext ctx;
+    InitContext(ctx);
+
+    EXPECT_CALL(*ctx.mDefaultCommissionerObject, IsActive()).WillOnce(Return(true));
+    EXPECT_CALL(*ctx.mDefaultCommissionerObject, IsConnected()).Times(0);
+
+    Interpreter::Expression expr;
+    Interpreter::Value      value;
+    expr  = ctx.mInterpreter.ParseExpression("state");
+    value = ctx.mInterpreter.Eval(expr);
+    EXPECT_STREQ("active", value.ToString().c_str());
+}
+
+TEST_F(InterpreterTestSuite, PC_ConnectSuccess)
+{
+    TestContext ctx;
+    InitContext(ctx);
+
+    {
+        InSequence s;
+        EXPECT_CALL(*ctx.mDefaultCommissionerObject, IsActive()).WillOnce(Return(false));
+        EXPECT_CALL(*ctx.mDefaultCommissionerObject, IsConnected()).WillOnce(Return(false));
+        EXPECT_CALL(*ctx.mDefaultCommissionerObject, Connect(_, _)).Times(1).WillOnce(Return(Error{}));
+        EXPECT_CALL(*ctx.mDefaultCommissionerObject, IsActive()).WillOnce(Return(false));
+        EXPECT_CALL(*ctx.mDefaultCommissionerObject, IsConnected()).WillOnce(Return(true));
+        EXPECT_CALL(*ctx.mDefaultCommissionerObject, GetActiveDataset(_, _)).WillOnce(Return(Error{}));
+        EXPECT_CALL(*ctx.mDefaultCommissionerObject, GetPendingDataset(_, _)).WillOnce(Return(Error{}));
+        EXPECT_CALL(*ctx.mDefaultCommissionerObject, Stop()).Times(1);
+        EXPECT_CALL(*ctx.mDefaultCommissionerObject, IsActive()).WillOnce(Return(false));
+        EXPECT_CALL(*ctx.mDefaultCommissionerObject, IsConnected()).WillOnce(Return(false));
+    }
+
+    Interpreter::Expression expr;
+    Interpreter::Value      value;
+    expr  = ctx.mInterpreter.ParseExpression("state");
+    value = ctx.mInterpreter.Eval(expr);
+    EXPECT_STREQ("stopped", value.ToString().c_str());
+
+    expr  = ctx.mInterpreter.ParseExpression("connect 127.0.0.1 20001");
+    value = ctx.mInterpreter.Eval(expr);
+    EXPECT_TRUE(value.HasNoError());
+
+    expr  = ctx.mInterpreter.ParseExpression("state");
+    value = ctx.mInterpreter.Eval(expr);
+    EXPECT_STREQ("connected", value.ToString().c_str());
+
+    expr  = ctx.mInterpreter.ParseExpression("opdataset get active");
+    value = ctx.mInterpreter.Eval(expr);
+    EXPECT_TRUE(value.HasNoError());
+
+    expr  = ctx.mInterpreter.ParseExpression("opdataset get pending");
+    value = ctx.mInterpreter.Eval(expr);
+    EXPECT_TRUE(value.HasNoError());
+
+    expr  = ctx.mInterpreter.ParseExpression("stop");
+    value = ctx.mInterpreter.Eval(expr);
+    EXPECT_TRUE(value.HasNoError());
+
+    expr  = ctx.mInterpreter.ParseExpression("state");
+    value = ctx.mInterpreter.Eval(expr);
+    EXPECT_STREQ("stopped", value.ToString().c_str());
 }
 
 TEST_F(InterpreterTestSuite, PC_StartLegacySyntaxSuccess)

@@ -85,6 +85,7 @@ public:
     State GetState() const override;
 
     bool IsActive() const override;
+    bool IsConnected() const override;
 
     bool IsCcmMode() const override;
 

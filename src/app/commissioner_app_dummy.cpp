@@ -108,6 +108,12 @@ Error CommissionerApp::Start(std::string       &aExistingCommissionerId,
     UNUSED(aBorderAgentPort);
     return Error{};
 }
+Error CommissionerApp::Connect(const std::string &aBorderAgentAddr, uint16_t aBorderAgentPort)
+{
+    UNUSED(aBorderAgentAddr);
+    UNUSED(aBorderAgentPort);
+    return Error{};
+}
 
 void CommissionerApp::Stop()
 {
@@ -118,6 +124,11 @@ void CommissionerApp::CancelRequests()
 }
 
 bool CommissionerApp::IsActive() const
+{
+    return false;
+}
+
+bool CommissionerApp::IsConnected() const
 {
     return false;
 }

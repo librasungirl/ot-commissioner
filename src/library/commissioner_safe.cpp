@@ -173,6 +173,11 @@ bool CommissionerSafe::IsActive() const
     return mImpl->IsActive();
 }
 
+bool CommissionerSafe::IsConnected() const
+{
+    return mImpl->IsConnected();
+}
+
 bool CommissionerSafe::IsCcmMode() const
 {
     return mImpl->IsCcmMode();

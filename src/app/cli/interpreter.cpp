@@ -200,13 +200,14 @@ const std::map<std::string, Interpreter::Evaluator> &Interpreter::mEvaluatorMap 
     {"announce", &Interpreter::ProcessAnnounce},   {"panid", &Interpreter::ProcessPanId},
     {"energy", &Interpreter::ProcessEnergy},       {"exit", &Interpreter::ProcessExit},
     {"quit", &Interpreter::ProcessExit},           {"help", &Interpreter::ProcessHelp},
-};
+    {"connect", &Interpreter::ProcessConnect},     {"state", &Interpreter::ProcessState}};
 
 const std::map<std::string, std::string> &Interpreter::mUsageMap = *new std::map<std::string, std::string>{
     {"config", "config get admincode\n"
                "config set admincode <9-digits-thread-administrator-passcode>\n"
                "config get pskc\n"
                "config set pskc <pskc-hex-string>"},
+    {"connect", "connect <border-agent-addr> <border-agent-port>"},
     {"start", "start <border-agent-addr> <border-agent-port>\n"
               "start [ --nwk <network-alias-list | --dom <domain-alias>]"},
     {"stop", "stop\n"
@@ -936,6 +937,50 @@ Interpreter::Value Interpreter::ProcessConfig(const Expression &aExpr)
     else
     {
         ExitNow(value = ERROR_INVALID_COMMAND(SYNTAX_INVALID_SUBCOMMAND, aExpr[1]));
+    }
+
+exit:
+    return value;
+}
+
+Interpreter::Value Interpreter::ProcessConnect(const Expression &aExpr)
+{
+    Error              error;
+    uint16_t           port;
+    CommissionerAppPtr commissioner = nullptr;
+
+    SuccessOrExit(error = mJobManager->GetSelectedCommissioner(commissioner));
+    VerifyOrExit(aExpr.size() >= 3, error = ERROR_INVALID_ARGS(SYNTAX_FEW_ARGS));
+    SuccessOrExit(error = ParseInteger(port, aExpr[2]));
+    SuccessOrExit(error = commissioner->Connect(aExpr[1], port));
+
+exit:
+    if (error != ErrorCode::kNone)
+    {
+        error = Error{error.GetCode(), "Failed to connect to BA"};
+    }
+
+    return error;
+}
+
+Interpreter::Value Interpreter::ProcessState(const Expression &)
+{
+    Value              value;
+    CommissionerAppPtr commissioner = nullptr;
+
+    SuccessOrExit(value = mJobManager->GetSelectedCommissioner(commissioner));
+
+    if (commissioner->IsActive())
+    {
+        value = std::string("active");
+    }
+    else if (commissioner->IsConnected())
+    {
+        value = std::string("connected");
+    }
+    else
+    {
+        value = std::string("stopped");
     }
 
 exit:

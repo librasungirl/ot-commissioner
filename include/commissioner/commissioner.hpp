@@ -421,6 +421,14 @@ public:
     virtual bool IsActive() const = 0;
 
     /**
+     * @brief Decide if the secure session is connected.
+     *
+     * @return true
+     * @return false
+     */
+    virtual bool IsConnected() const = 0;
+
+    /**
      * @brief Decide if the commissioner is running in CCM mode.
      *
      * @return true

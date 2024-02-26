@@ -126,6 +126,8 @@ public:
 
     MOCKABLE void OnDatasetChanged() override;
 
+    MOCKABLE Error Connect(const std::string &aBorderAgentAddr, uint16_t aBorderAgentPort);
+
     MOCKABLE Error Start(std::string       &aExistingCommissionerId,
                          const std::string &aBorderAgentAddr,
                          uint16_t           aBorderAgentPort);
@@ -136,6 +138,9 @@ public:
     // Returns if current commissioner is in active state.
     // Should always be true if starting the commissioner app has succeed.
     MOCKABLE bool IsActive() const;
+
+    // Returns if secure session is connected.
+    MOCKABLE bool IsConnected() const;
 
     bool IsCcmMode() const;
 
