@@ -70,7 +70,7 @@ install_cmake() {
     cd cmake-${version}
     ./bootstrap --prefix=/usr --parallel=${concurrency} -- -DCMAKE_BUILD_TYPE:STRING=Release
     make -j${concurrency}
-    sudo make install
+    make install
     cd -
 
     rm -rf cmake-${version}.tar.gz cmake-${version}
@@ -82,18 +82,7 @@ if [ "$(uname)" = "Linux" ]; then
 
     ## FIXME(wgtdkp): this is only apt install
     ## Install packages
-    sudo apt-get update
-    sudo apt-get install -y \
-                         build-essential \
-                         libreadline-dev \
-                         cmake \
-                         ninja-build \
-                         swig \
-                         lcov \
-                         jsonlint
-
-    sudo apt-get --no-install-recommends install -y clang-format-9 || echo 'WARNING: could not install clang-format-9, which is useful if you plan to contribute C/C++ code to the OpenThread project.'
-    python3 -m pip install yapf==0.29.0 || echo 'WARNING: could not install yapf, which is useful if you plan to contribute python code to the OpenThread project.'
+   # python3 -m pip install yapf==0.29.0 || echo 'WARNING: could not install yapf, which is useful if you plan to contribute python code to the OpenThread project.'
 
     ## Install newest CMake
     match_version "$(cmake --version | grep -E -o '[0-9].*')" "${MIN_CMAKE_VERSION}" || {
