@@ -268,7 +268,9 @@ void CommissionerImpl::Petition(PetitionHandler aHandler, const std::string &aAd
         else
         {
             LOG_DEBUG(LOG_REGION_MESHCOP, "DTLS connection to border agent succeed");
-            SendPetition(aHandler);
+            LOG_DEBUG(LOG_REGION_MESHCOP, "======skip petition request======");
+            // SendPetition(aHandler);
+            aHandler(nullptr, aError);
         }
     };
 
@@ -1181,7 +1183,8 @@ exit:
 
 void CommissionerImpl::SendPetition(PetitionHandler aHandler)
 {
-    Error         error;
+    Error error;
+
     coap::Request request{coap::Type::kConfirmable, coap::Code::kPost};
 
     auto onResponse = [this, aHandler](const coap::Response *aResponse, Error aError) {
@@ -1229,6 +1232,7 @@ void CommissionerImpl::SendPetition(PetitionHandler aHandler)
     };
 
     VerifyOrExit(mState == State::kDisabled, error = ERROR_INVALID_STATE("the commissioner is petitioning or active"));
+
     SuccessOrExit(error = request.SetUriPath(uri::kPetitioning));
     SuccessOrExit(error = AppendTlv(request, {tlv::Type::kCommissionerId, mConfig.mId}));
 
