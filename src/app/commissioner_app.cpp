@@ -170,9 +170,9 @@ Error CommissionerApp::SyncNetworkData(void)
 
     SuccessOrExit(error = mCommissioner->GetActiveDataset(activeDataset, 0xFFFF));
     SuccessOrExit(error = mCommissioner->GetPendingDataset(pendingDataset, 0xFFFF));
-    SuccessOrExit(error = mCommissioner->SetCommissionerDataset(mCommDataset));
-    SuccessOrExit(error = mCommissioner->GetCommissionerDataset(commDataset, 0xFFFF));
-    MergeDataset(mCommDataset, commDataset);
+    // SuccessOrExit(error = mCommissioner->SetCommissionerDataset(mCommDataset));
+    // SuccessOrExit(error = mCommissioner->GetCommissionerDataset(commDataset, 0xFFFF));
+    // MergeDataset(mCommDataset, commDataset);
 
     if (IsCcmMode())
     {

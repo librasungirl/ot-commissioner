@@ -484,7 +484,7 @@ void CommissionerImpl::GetRawActiveDataset(Handler<ByteArray> aHandler, uint16_t
         }
     };
 
-    VerifyOrExit(IsActive(), error = ERROR_INVALID_STATE("the commissioner is not active"));
+    // VerifyOrExit(IsActive(), error = ERROR_INVALID_STATE("the commissioner is not active"));
     SuccessOrExit(error = request.SetUriPath(uri::kMgmtActiveGet));
     if (!datasetList.empty())
     {
@@ -590,7 +590,7 @@ void CommissionerImpl::GetPendingDataset(Handler<PendingOperationalDataset> aHan
         }
     };
 
-    VerifyOrExit(IsActive(), error = ERROR_INVALID_STATE("the commissioner is not active"));
+    // VerifyOrExit(IsActive(), error = ERROR_INVALID_STATE("the commissioner is not active"));
     SuccessOrExit(error = request.SetUriPath(uri::kMgmtPendingGet));
     if (!datasetList.empty())
     {
@@ -604,7 +604,12 @@ void CommissionerImpl::GetPendingDataset(Handler<PendingOperationalDataset> aHan
     }
 #endif
 
-    mProxyClient.SendRequest(request, onResponse, kLeaderAloc16, kDefaultMmPort);
+    // mProxyClient.SendRequest(request, onResponse, kLeaderAloc16, kDefaultMmPort);
+
+    // Send MGMT_ACTIVE_GET.req to the Border Agent but not the Leader,
+    // because we don't possess the Mesh-Local Prefix before getting the
+    // Active Operational Dataset.
+    mBrClient.SendRequest(request, onResponse);
 
     LOG_DEBUG(LOG_REGION_MGMT, "sent MGMT_PENDING_GET.req");
 
